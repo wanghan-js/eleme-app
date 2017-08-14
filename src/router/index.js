@@ -1,13 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import goods from '@/components/goods/goods'
-import ratings from '@/components/ratings/ratings'
-import seller from '@/components/seller/seller'
+import Goods from '@/components/Goods/Goods'
+import Ratings from '@/components/Ratings/Ratings'
+import Seller from '@/components/Seller/Seller'
 
 Vue.use(Router)
 
 export default new Router({
+  linkActiveClass: 'active',
   mode: 'history',
   routes: [
     {
@@ -16,15 +17,15 @@ export default new Router({
     },
     {
       path: '/goods',
-      component: goods
+      component: Goods
     },
     {
       path: '/ratings',
-      component: ratings
+      component: Ratings
     },
     {
       path: '/seller',
-      component: seller
+      component: Seller
     }
   ]
 })

@@ -1,0 +1,19 @@
+// 定义 1 物理像素的 mixin
+border-1px(color)
+  position relative
+  &::after
+    content ""
+    position absolute
+    bottom 0
+    height 1px
+    background color
+    // 注意伪元素的父元素就是它附着的那个元素
+    // 而且是它的最后一个 child
+    // 所以这里的 width 100% 会继承其相对定位的父元素
+    width 100%
+
+// 定义背景图片的 mixin
+bg-image(url)
+  background-image url(url + "@2x.png")
+  @media (-webkit-min-device-pixel-ratio: 3), (min-device-pixel-ratio: 3)
+    background-image url(url + "@3x.png")

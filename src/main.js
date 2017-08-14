@@ -1,11 +1,13 @@
 import Vue from 'vue'
-import app from './app'
+import App from './App'
 import router from './router'
+
+import './assets/style/index.styl'
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
-  template: '<app/>',
-  components: { app }
+  template: '<App />',
+  components: { App }
 })
