@@ -32,7 +32,7 @@
     <div class="background">
       <img src="http://static.galileo.xiaojukeji.com/static/tms/seller_avatar_256px.jpg" width="100%" height="100%" alt="">
     </div>
-    <div class="mask">
+    <div class="mask" v-if="false">
       <div class="mask-wrapper">
         <div class="mask-main">
           <h1 class="title">粥品香坊（大运村）</h1>

@@ -21,6 +21,37 @@ var autoOpenBrowser = !!config.dev.autoOpenBrowser
 var proxyTable = config.dev.proxyTable
 
 var app = express()
+// ------------------------------------------------
+// mock data start
+
+// 1. get json data, generate a javascript object
+const data = require('../src/mock/data.json')
+
+// 2. get router
+const router = express.Router()
+
+// 3. register routes
+router.get('/goods', (req, res) => res.json({
+  code: 0, // 0 indicates valid data
+  data: data.goods
+}))
+
+router.get('/ratings', (req, res) => res.json({
+  code: 0,
+  data: data.ratings
+}))
+
+router.get('/seller', (req, res) => res.json({
+  code: 0,
+  data: data.seller
+}))
+
+// 4. start router, normally we use '/api' as the url prefix to indicate it is
+// just for testing mock data
+app.use('/api', router)
+
+// mock data end
+// ------------------------------------------------
 var compiler = webpack(webpackConfig)
 
 var devMiddleware = require('webpack-dev-middleware')(compiler, {
