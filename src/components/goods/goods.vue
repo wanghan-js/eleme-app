@@ -1,9 +1,9 @@
 <template lang="html">
-  <div class="">
+  <div>
     <div class="goods">
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
-          <li class="menu-item" v-for="(g, index) in goods" :class="{current: currentIndex === index}" @click="clickMenuItem(index)">
+          <li class="menu-item" v-for="(g, index) in goods" :class="{current: currentIndex === index}" @click="clickMenuItem(index, $event)">
             <span class="text border-1px">
               <span
                 class="icon"
@@ -38,7 +38,7 @@
                     <span class="old" v-show="f.oldPrice">￥{{ f.oldPrice}}</span>
                   </div>
                   <div class="cartcontrol-wrapper">
-                    cartcontrol 组件
+                    <cart-control :food="f" :update-food-count="updateFoodCount"></cart-control>
                   </div>
                 </div>
               </li>
@@ -53,9 +53,12 @@
 <script>
 import BScroll from 'better-scroll'
 
+import CartControl from '../CartControl/CartControl'
+
 const OK = 0
 
 export default {
+  props: ['seller'],
   data () {
     return {
       goods: [],
@@ -98,6 +101,7 @@ export default {
       })
       // 创建右侧食物列表的 scroll
       this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
+        click: true,
         probeType: 3 // 接收 scroll 事件，参考 better-scroll 的文档
       })
 
@@ -120,11 +124,42 @@ export default {
       this.tops = tops
     },
 
-    clickMenuItem (index) {
+    clickMenuItem (index, e) {
+      // 当点击事件触发时，阻止原生点击事件执行此回调函数
+      // 只允许 better-scroll 自己包装的点击事件执行此回调函数
+      // 原理就是检测回调函数中传入的事件对象里面有没有一个属性 _construted，此属性为 better-scroll 专有
+      // 如果没有，那就是原生的点击事件，函数直接返回，不再继续执行
+      // 这样可以避免在 PC 端运行项目时，会触发两次点击事件的 bug（原生点击事件一次，better-scroll 包装的点击事件一次）
+      if (!e._constructed) {
+        return
+      }
       // 得到对应的 li
       const li = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook')[index]
       // 通过 foodsScroll 来平滑的滚动到指定的 li 处
       this.foodsScroll.scrollToElement(li, 500)
+    },
+
+    updateFoodCount (food, isAdd) {
+      // 三元运算符实现
+      // isAdd
+      // ? (food.count ? food.count++ : this.$set(food, 'count', 1))
+      // : (food.count && food.count--)
+
+      if (isAdd) {
+        if (food.count) {
+          // 只有当 food.count 存在，并且不为 0 时（即大于等于 1 ），才将它加 1
+          food.count++
+        } else {
+          // 否则，调用 Vue 实例对象的 $set() 方法给 food 添加一个 count 属性，并赋值为 1
+          // 这里不能直接给 food 添加 count 属性，因为 Vue 无法对初始化后添加的属性进行数据绑定，所以只能使用 $set() 方法
+          this.$set(food, 'count', 1)
+        }
+      } else {
+        if (food.count) {
+          // 只有当 food.count 存在，并且不为 0 时（即大于等于 1 ），才将它减 1
+          food.count--
+        }
+      }
     }
   },
 
@@ -138,7 +173,9 @@ export default {
         return scrollY >= top && scrollY < tops[index + 1]
       })
     }
-  }
+  },
+
+  components: { CartControl }
 }
 </script>
 
