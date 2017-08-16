@@ -1,6 +1,6 @@
 <template lang="html">
   <div>
-    <ele-header></ele-header>
+    <ele-header :seller="seller"></ele-header>
 
     <div class="tab border-1px">
       <div class="tab-item">
@@ -14,16 +14,21 @@
       </div>
     </div>
 
-    <router-view></router-view>
+    <router-view :seller="seller"></router-view>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
-
 import Header from './components/Header/Header'
 
+const OK = 0 // 表示拿到正常数据
 export default {
+  data () {
+    return {
+      seller: {}
+    }
+  },
+
   created () {
     // 使用 vue-resource 发送 ajax 请求 express 提供的模拟接口
     this.$http.get('/api/goods')
@@ -32,11 +37,15 @@ export default {
         console.log('vue-resource', result)
       })
     // 使用 axios 发送 ajax 请求 mockjs 提供的模拟接口
-    axios.get('/api2/seller')
+    this.$ajax.get('/api2/seller')
       .then(response => {
         const result = response.data
         console.log('axios', result)
+        if (result.code === OK) {
+          this.seller = result.data
+        }
       })
+      .catch(error => console.error(error))
   },
 
   components: { 'ele-header': Header }
@@ -51,7 +60,7 @@ export default {
   height 40px
   line-height 40px
   font-size 14px
-  border-1px(pink)
+  border-1px(rgba(7,17,27,.1))
   .tab-item
     width 0
     flex 1

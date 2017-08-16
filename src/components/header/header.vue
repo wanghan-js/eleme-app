@@ -2,48 +2,48 @@
   <div class="header">
     <div class="content-wrapper">
       <div class="avatar">
-        <img src="http://static.galileo.xiaojukeji.com/static/tms/seller_avatar_256px.jpg" width="64" height="64" alt="">
+        <img :src="seller.avatar" width="64" height="64" alt="avatar">
       </div>
       <div class="content">
         <div class="title">
           <span class="brand"></span>
-          <span class="name">粥品香坊（回龙观）</span>
+          <span class="name">{{ seller.name }}</span>
         </div>
         <div class="description">
-          蜂鸟专送 / 38分钟送达
+          {{ seller.description }} / {{ seller.deliveryTime }}分钟送达
         </div>
-        <div class="supports">
-          <span class="icon special"></span>
-          <span class="text">在线支付满28送晓飞张</span>
+        <!--
+          这里必须要加 v-if 判断是否渲染，因为 ajax 请求数据是异步的，而模版是立即解析的，
+          在还没拿到数据时，seller 是个空对象，读取一个空对象的值时返回 undefined
+          再读取这个 undefined 的值会报错，所以在 seller 为空对象时不能渲染此标签
+        -->
+        <div class="supports" v-if="seller.supports">
+          <span class="icon" :class="supportClasses[seller.supports[0].type]"></span>
+          <span class="text">{{ seller.supports[0].description }}</span>
         </div>
       </div>
-      <div class="support-count">
-        <span>5 个</span>
+      <div class="support-count" v-if="seller.supports" @click="showDetail(true)">
+        <span>{{ seller.supports.length }} 个</span>
         <span class="icon-keyboard_arrow_right"></span>
       </div>
     </div>
-    <div class="bulletin-wrapper">
+    <div class="bulletin-wrapper" @click="showDetail(true)">
       <span class="bulletin-title"></span>
       <span class="bulletin-text">
-        粥品香坊其烹饪粥料的秘方源于中国千年古法，在融和现代制作工艺，由世界烹饪大师屈浩先生领衔研发。坚守纯天然、0添加的良心品质深得消费者青睐，发展至今成为粥类的引领品牌。是2008年奥运会和2013年园博会指定餐饮服务商。
+        {{ seller.bulletin }}
       </span>
       <span class="icon-keyboard_arrow_right"></span>
     </div>
     <div class="background">
-      <img src="http://static.galileo.xiaojukeji.com/static/tms/seller_avatar_256px.jpg" width="100%" height="100%" alt="">
+      <img :src="seller.avatar" width="100%" height="100%" alt="">
     </div>
-    <div class="mask" v-if="false">
+    <transition name="fade">
+      <div class="mask" v-show="isShow">
       <div class="mask-wrapper">
         <div class="mask-main">
-          <h1 class="title">粥品香坊（大运村）</h1>
-          <div class="stars-wrapper">
-            <div class="stars stars-48">
-              <span class="star on"></span>
-              <span class="star on"></span>
-              <span class="star on"></span>
-              <span class="star on"></span>
-              <span class="star on"></span>
-            </div>
+          <h1 class="title">{{ seller.name }}</h1>
+          <div class="stars-wrapper" v-if="seller.score">
+            <star :score="seller.score" :size="48"></star>
           </div>
           <div class="info">
             <div class="line">
@@ -57,25 +57,9 @@
             </div>
           </div>
           <ul class="list">
-            <li>
-              <span class="icon decrease"></span>
-              <span class="text">在线支付满28减2个晓飞张</span>
-            </li>
-            <li>
-              <span class="icon discount"></span>
-              <span class="text">晓飞张全场8折</span>
-            </li>
-            <li>
-              <span class="icon guarantee"></span>
-              <span class="text">单人晓飞张</span>
-            </li>
-            <li>
-              <span class="icon invoice"></span>
-              <span class="text">该商家支持发票，请下单写好晓飞张</span>
-            </li>
-            <li>
-              <span class="icon special"></span>
-              <span class="text">已加入“晓飞张”计划，食品安全保障</span>
+            <li v-for="item in seller.supports">
+              <span class="icon" :class="supportClasses[item.type]"></span>
+              <span class="text">{{ item.description }}</span>
             </li>
           </ul>
           <div class="info">
@@ -91,20 +75,44 @@
           </div>
           <div class="content">
             <p class="text">
-              粥品香坊其烹饪粥料的秘方源于中国千年古法，在融和现代制作工艺，由世界烹饪大师屈浩先生领衔研发。坚守纯天然、0添加的良心品质深得消费者青睐，发展至今成为粥类的引领品牌。是2008年奥运会和2013年园博会指定餐饮服务商。
+              {{ seller.bulletin }}
             </p>
           </div>
         </div>
       </div>
       <div class="mask-footer">
-        <span class="icon-close"></span>
+        <span class="icon-close" @click="showDetail(false)"></span>
       </div>
     </div>
+    </transition>
   </div>
 </template>
 
 <script>
+import Star from '../Star/Star'
+
 export default {
+  props: ['seller'],
+  data () {
+    return {
+      supportClasses: [
+        'decrease',
+        'discount',
+        'guarantee',
+        'invoice',
+        'special'
+      ],
+      isShow: false
+    }
+  },
+
+  methods: {
+    showDetail (isShow) {
+      this.isShow = isShow
+    }
+  },
+
+  components: { Star }
 }
 </script>
 
@@ -228,6 +236,12 @@ export default {
     height 100%
     background rgba(7, 17, 27, .8)
     overflow auto
+    &.fade-enter-active
+    &.fade-leave-active
+      transition opacity .5s
+    &.fade-enter
+    &.fade-leave-to
+      opacity 0
     .mask-wrapper
       min-height 100%
       .mask-main
@@ -241,51 +255,6 @@ export default {
         .stars-wrapper
           height 24px
           margin 16px 0 28px 0
-          .stars
-            text-align center
-            .star
-              display inline-block
-              background-repeat no-repeat
-              background-size 100% 100%
-            &.stars-48
-              .star
-                width 20px
-                height 19px
-                margin-right 20px
-                &:last-child
-                  margin-right 0
-                &.on
-                  bg-image("../../assets/image/star-icon/star48_on")
-                &.half
-                  bg-image("../../assets/image/star-icon/star48_half")
-                &.off
-                  bg-image("../../assets/image/star-icon/star48_off")
-            &.stars-36
-              .star
-                width 15px
-                height 15px
-                margin-right 15px
-                &:last-child
-                  margin-right 0
-                &.on
-                  bg-image("../../assets/image/star-icon/star36_on")
-                &.half
-                  bg-image("../../assets/image/star-icon/star36_half")
-                &.off
-                  bg-image("../../assets/image/star-icon/star36_off")
-            &.stars-24
-              .star
-                width 10px
-                height 10px
-                margin-right 10px
-                &:last-child
-                  margin-right 0
-                &.on
-                  bg-image("../../assets/image/star-icon/star24_on")
-                &.half
-                  bg-image("../../assets/image/star-icon/star24_half")
-                &.off
-                  bg-image("../../assets/image/star-icon/star24_off")
         .info
           display flex
           width 80%
