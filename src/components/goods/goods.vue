@@ -46,14 +46,14 @@
           </li>
         </ul>
       </div>
+      <shopping-cart :min-price="seller.minPrice" :delivery-price="seller.deliveryPrice" :foods="cartFoods" :update-food-count="updateFoodCount" :clear-cart="clearCart"></shopping-cart>
     </div>
   </div>
 </template>
 
 <script>
-import BScroll from 'better-scroll'
-
 import CartControl from '../CartControl/CartControl'
+import ShoppingCart from '../ShoppingCart/ShoppingCart'
 
 const OK = 0
 
@@ -96,11 +96,11 @@ export default {
     _initScroll () {
       // 创建左侧菜单列表的 scroll
       // 注意需要滑动的元素不能有兄弟元素，也就是 wrapper 元素只能有一个孩子
-      new BScroll(this.$refs.menuWrapper, {
+      new this.$scroll(this.$refs.menuWrapper, {
         click: true // 开启滑动元素的 click 事件，参考 better-scroll 的文档
       })
       // 创建右侧食物列表的 scroll
-      this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
+      this.foodsScroll = new this.$scroll(this.$refs.foodsWrapper, {
         click: true,
         probeType: 3 // 接收 scroll 事件，参考 better-scroll 的文档
       })
@@ -160,6 +160,11 @@ export default {
           food.count--
         }
       }
+    },
+
+    // 清空购物车，将 cartfoods 中所有 food 的 count 属性值设为 0
+    clearCart () {
+      this.cartFoods.forEach(f => (f.count = 0))
     }
   },
 
@@ -172,10 +177,19 @@ export default {
       return tops.findIndex((top, index) => {
         return scrollY >= top && scrollY < tops[index + 1]
       })
+    },
+
+    // 所有 count 大于 0 的 food 组成的数组的计算属性
+    cartFoods () {
+      const foods = []
+
+      this.goods.forEach(g => foods.push(...g.foods.filter(f => f.count)))
+
+      return foods
     }
   },
 
-  components: { CartControl }
+  components: { CartControl, ShoppingCart }
 }
 </script>
 

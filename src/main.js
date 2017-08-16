@@ -3,6 +3,7 @@ import App from './App'
 import router from './router'
 import VueResource from 'vue-resource'
 import axios from 'axios'
+import BScroll from 'better-scroll'
 
 // 引入此模块就可以访问其映射的路由接口
 import './mock/MockServer'
@@ -16,6 +17,7 @@ Vue.use(VueResource)
 // 将 axios 添加到 Vue 的显式原型上，这样每个组件的 Vue 实例中才能访问到 axios 对象
 // 否则就要在每个需要发送 ajax 请求的组件中单独引入 axios 模块
 Vue.prototype.$ajax = axios
+Vue.prototype.$scroll = BScroll
 
 new Vue({
   el: '#app',
