@@ -60,6 +60,8 @@
 <script>
 import CartControl from '../CartControl/CartControl'
 
+import BScroll from 'better-scroll'
+
 export default {
   props: {
     minPrice: Number,
@@ -107,17 +109,18 @@ export default {
       // 生成单例 scroll，避免每次打开 list 都重复创建一个 scroll
       // 使用 Vue 实例对象的 $nextTick 方法来控制在 DOM 渲染结束后才创建 scroll
       // 如果太早创建 scroll 则无法滚动（因为当 DOM 没有准备好时，无法得到元素的高度）
-      if (this.isShow) {
-        if (this.listScroll) {
-          // 每次打开 list 时刷新 scroll，以免 list 高度发生变化
-          this.listScroll.refresh()
-        } else {
-          this.$nextTick(() => {
-            this.listScroll = new this.$scroll(this.$refs.listContent, {
+
+      if (this.isShow) { // 要显示
+        this.$nextTick(() => {
+          if (!this.scroll) { // 如果不存在才创建, 并保存
+            this.scroll = new BScroll(this.$refs.listContent, {
               click: true
             })
-          })
-        }
+          } else {
+            // 每次打开 list 时刷新 scroll，以免 list 高度发生变化
+            this.scroll.refresh()
+          }
+        })
       }
 
       return this.isShow

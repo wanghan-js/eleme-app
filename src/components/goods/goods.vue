@@ -20,7 +20,7 @@
           <li class="food-list food-list-hook" v-for="g in goods">
             <h1 class="title">{{ g.name }}</h1>
             <ul>
-              <li class="food-item border-1px" v-for="f in g.foods">
+              <li class="food-item border-1px" v-for="f in g.foods" @click="showFood(f)">
                 <div class="icon">
                   <img :src="f.icon" alt="food icon" width="57" height="57">
                 </div>
@@ -48,12 +48,16 @@
       </div>
       <shopping-cart :min-price="seller.minPrice" :delivery-price="seller.deliveryPrice" :foods="cartFoods" :update-food-count="updateFoodCount" :clear-cart="clearCart"></shopping-cart>
     </div>
+    <food :food="selectFood" :updateFoodCount="updateFoodCount" ref="food"></food>
   </div>
 </template>
 
 <script>
 import CartControl from '../CartControl/CartControl'
 import ShoppingCart from '../ShoppingCart/ShoppingCart'
+import Food from '../Food/Food'
+
+import BScroll from 'better-scroll'
 
 const OK = 0
 
@@ -70,7 +74,8 @@ export default {
         'special'
       ],
       tops: [],
-      scrollY: 0
+      scrollY: 0,
+      selectFood: null
     }
   },
 
@@ -96,11 +101,11 @@ export default {
     _initScroll () {
       // 创建左侧菜单列表的 scroll
       // 注意需要滑动的元素不能有兄弟元素，也就是 wrapper 元素只能有一个孩子
-      new this.$scroll(this.$refs.menuWrapper, {
+      new BScroll(this.$refs.menuWrapper, {
         click: true // 开启滑动元素的 click 事件，参考 better-scroll 的文档
       })
       // 创建右侧食物列表的 scroll
-      this.foodsScroll = new this.$scroll(this.$refs.foodsWrapper, {
+      this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
         click: true,
         probeType: 3 // 接收 scroll 事件，参考 better-scroll 的文档
       })
@@ -165,6 +170,13 @@ export default {
     // 清空购物车，将 cartfoods 中所有 food 的 count 属性值设为 0
     clearCart () {
       this.cartFoods.forEach(f => (f.count = 0))
+    },
+
+    showFood (food) {
+      // 指定选择的 food
+      this.selectFood = food
+      // 得到 food 组件对象，显示 food 组件
+      this.$refs.food.show(true)
     }
   },
 
@@ -189,7 +201,7 @@ export default {
     }
   },
 
-  components: { CartControl, ShoppingCart }
+  components: { CartControl, ShoppingCart, Food }
 }
 </script>
 
