@@ -25,7 +25,8 @@
         </div>
       </div>
       <div class="ball-container">
-        <transition v-for="b in balls" @before-enter="beforeDrop" @enter="dropping" @after-enter="afterDrop" :css="false">
+        <transition v-for="(b, index) in balls" @before-enter="beforeDrop" @enter="dropping" @after-enter="afterDrop" :css="false" :key="index">
+          <!-- 因为小球移动时是做拋物线运动，所以它必然是同时往 x 轴和 y 轴两个方向上运动，并且两个方向上运动的速率是不一样的（也就是贝赛尔曲线不一样），这样的话，用一个 div 是无法达到要求的，因为同一个元素只能设置一种贝赛尔曲线。所以这里我们用了两个 div，一个负责做 x 轴运动，另一个负责做 y 轴运动，且它们的贝赛尔曲线不一样 -->
           <div class="ball" v-show="b.isShow">
             <div class="inner inner-hook"></div>
           </div>

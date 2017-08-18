@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="stars" :class="`stars-${ size }`">
+  <div class="stars" v-if="score" :class="`stars-${size}`">
     <span class="star" v-for="s in starClasses" :class="s"></span>
   </div>
 </template>
@@ -14,7 +14,7 @@ export default {
   computed: {
     starClasses () {
       const score = this.score
-      const stars = Array(Math.floor(score)).fill('on')
+      let stars = Array(Math.floor(score)).fill('on')
       Math.round(score) >= score && stars.push('half')
       return [...stars, ...Array(5 - Math.round(score)).fill('off')]
     }
