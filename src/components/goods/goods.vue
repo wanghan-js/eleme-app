@@ -46,7 +46,7 @@
           </li>
         </ul>
       </div>
-      <shopping-cart :min-price="seller.minPrice" :delivery-price="seller.deliveryPrice" :foods="cartFoods" :update-food-count="updateFoodCount" :clear-cart="clearCart"></shopping-cart>
+      <shopping-cart :min-price="seller.minPrice" :delivery-price="seller.deliveryPrice" :foods="cartFoods" :update-food-count="updateFoodCount" :clear-cart="clearCart" ref="shopcart"></shopping-cart>
     </div>
     <food :food="selectFood" :updateFoodCount="updateFoodCount" ref="food"></food>
   </div>
@@ -157,7 +157,7 @@ export default {
       }, 500)
     },
 
-    updateFoodCount (food, isAdd) {
+    updateFoodCount (food, isAdd, e) {
       // 三元运算符实现
       // isAdd
       // ? (food.count ? food.count++ : this.$set(food, 'count', 1))
@@ -172,6 +172,8 @@ export default {
           // 这里不能直接给 food 添加 count 属性，因为 Vue 无法对初始化后添加的属性进行数据绑定，所以只能使用 $set() 方法
           this.$set(food, 'count', 1)
         }
+        // 让一个小球开始 drop 动画
+        this.$refs.shopcart.startDrop(e.target)
       } else {
         if (food.count) {
           // 只有当 food.count 存在，并且不为 0 时（即大于等于 1 ），才将它减 1

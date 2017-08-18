@@ -25,7 +25,11 @@
         </div>
       </div>
       <div class="ball-container">
-
+        <transition v-for="b in balls" @before-enter="beforeDrop" @enter="dropping" @after-enter="afterDrop" :css="false">
+          <div class="ball" v-show="b.isShow">
+            <div class="inner inner-hook"></div>
+          </div>
+        </transition>
       </div>
       <transition name="fold">
         <div class="shopcart-list" v-show="listShow">
@@ -71,7 +75,16 @@ export default {
 
   data () {
     return {
-      isShow: false
+      isShow: false,
+      // 所有小球状态的数组
+      balls: [
+        {isShow: false},
+        {isShow: false},
+        {isShow: false},
+        {isShow: false},
+        {isShow: false}
+      ],
+      droppingBalls: [] // 保存所有显示的小球对应的 ball
     }
   },
 
@@ -128,6 +141,57 @@ export default {
   methods: {
     toggleFoods () {
       this.isShow = !this.isShow
+    },
+
+    // 找到一个隐藏的小球，让它显示出来，并开始动画过程
+    startDrop (startEl) {
+      // 在 balls 中找到一个 isShow 为 false 的 ball 对象
+      const ball = this.balls.find(b => !b.isShow)
+      if (ball) {
+        // 让对应的小球显示
+        ball.isShow = true // 后面就会自动调用动画的相关生命周期函数
+        // 保存 startEl 到对应的 ball 对象
+        ball.startEl = startEl
+        // 保存 ball
+        this.droppingBalls.push(ball)
+      }
+    },
+
+    // 在显示动画开始之前调用：指定动画开始时的状态
+    beforeDrop (el) { // el 是发生动画的小球 div
+      // 删除下标为 0 的 ball，并将其返回
+      const ball = this.droppingBalls.shift()
+      const startEl = ball.startEl
+      // 计算 x 轴和 y 轴的偏移量
+      const { left: startElLeft, top: startElTop } = startEl.getBoundingClientRect()
+      const elLeft = 32 // 固定值，从 CSS 中获取
+      const elBottom = 22 // 固定值，从 CSS 中获取
+      const offsetY = -(window.innerHeight - startElTop - elBottom)
+      const offsetX = startElLeft - elLeft
+
+      // 瞬间移动到指定的位置（加号的位置）
+      el.style.transform = `translateY(${offsetY}px)`
+      el.children[0].style.transform = `translateX(${offsetX}px)`
+
+      // 保存 ball 到 el 里面，便于让其他动画生命周期函数看到当次发生动画的 ball
+      el.ball = ball
+    },
+    // 一开始动画就调用：指定动画结束时的状态
+    dropping (el) {
+      // 强制重绘重排
+      const temp = el.clientHeight
+      // 异步指定
+      this.$nextTick(() => {
+        el.style.transform = `translateY(0)`
+        el.children[0].style.transform = `translateX(0)`
+      })
+    },
+    // 动画结束后调用：做一些收尾工作
+    afterDrop (el) {
+      // 延迟隐藏 ball
+      setTimeout(() => {
+        el.ball.isShow = false
+      }, 400)
     }
   },
 
