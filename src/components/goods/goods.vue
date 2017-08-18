@@ -57,8 +57,6 @@ import CartControl from '../CartControl/CartControl'
 import ShoppingCart from '../ShoppingCart/ShoppingCart'
 import Food from '../Food/Food'
 
-import BScroll from 'better-scroll'
-
 const OK = 0
 
 export default {
@@ -101,17 +99,22 @@ export default {
     _initScroll () {
       // 创建左侧菜单列表的 scroll
       // 注意需要滑动的元素不能有兄弟元素，也就是 wrapper 元素只能有一个孩子
-      new BScroll(this.$refs.menuWrapper, {
+      new this.$scroll(this.$refs.menuWrapper, {
         click: true // 开启滑动元素的 click 事件，参考 better-scroll 的文档
       })
       // 创建右侧食物列表的 scroll
-      this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
+      this.foodsScroll = new this.$scroll(this.$refs.foodsWrapper, {
         click: true,
         probeType: 3 // 接收 scroll 事件，参考 better-scroll 的文档
       })
 
       // 监视 scroll 事件，滑动过程中自动收集 scrollY 的值
-      this.foodsScroll.on('scroll', pos => (this.scrollY = Math.abs(pos.y)))
+      this.enable = true // 标识是否自动接收实时的 scrollY 的值
+      this.foodsScroll.on('scroll', pos => {
+        if (this.enable) {
+          this.scrollY = Math.abs(pos.y)
+        }
+      })
     },
 
     _initTops () {
@@ -138,10 +141,20 @@ export default {
       if (!e._constructed) {
         return
       }
+      // 点击后左边菜单立即跳转到对应的菜单项
+      this.scrollY = this.tops[index]
       // 得到对应的 li
       const li = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook')[index]
+      // 禁止 scroll 监听的回调函数体执行
+      this.enable = false
       // 通过 foodsScroll 来平滑的滚动到指定的 li 处
       this.foodsScroll.scrollToElement(li, 500)
+
+      // 滚动完成后（什么时候完成，时间跟你设置的 scrollToElement 滚动动画持续时间一致）
+      // 启用 scroll 监听的回调函数体执行
+      setTimeout(() => {
+        this.enable = true
+      }, 500)
     },
 
     updateFoodCount (food, isAdd) {

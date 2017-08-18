@@ -2,7 +2,7 @@
 import Vue from 'vue'
 import VueResource from 'vue-resource'
 import axios from 'axios'
-// import BScroll from 'better-scroll'
+import BScroll from 'better-scroll'
 import moment from 'moment'
 
 // 引入自定义组件
@@ -26,7 +26,7 @@ Vue.filter('date-string', value => moment(value).format('YYYY-MM-DD HH:mm:ss'))
 // 否则就要在每个需要发送 ajax 请求的组件中单独引入 axios 模块
 // 其他组件公用的库，都可以这样操作
 Vue.prototype.$ajax = axios
-// Vue.prototype.$scroll = BScroll
+Vue.prototype.$scroll = BScroll
 
 new Vue({
   el: '#app',

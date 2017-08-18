@@ -1,61 +1,64 @@
 <template lang="html">
   <transition name="move">
-    <div class="food" v-if="isShow" ref="food">
+    <!-- 这里要用 v-show 来控制 food 组件的显示和隐藏，不能用 v-if，否则的话，隐藏后整个 元素会消失，scroll 不会再生效 -->
+    <div class="food" v-show="isShow" ref="food">
       <div class="food-content">
-        <div class="image-header">
-          <img :src="food.image">
-          <div class="back">
-            <span class="icon-arrow_lift" @click="show(false)"></span>
+        <template v-if="isShow">
+          <div class="image-header">
+            <img :src="food.image">
+            <div class="back">
+              <span class="icon-arrow_lift" @click="show(false)"></span>
+            </div>
           </div>
-        </div>
 
-        <div class="content">
-          <h1 class="title">{{ food.name }}</h1>
-          <div class="detail">
-            <span class="sell-count">月售 {{ food.sellCount }} 份</span>
-            <span class="rating">好评率 {{ food.rating }}%</span>
+          <div class="content">
+            <h1 class="title">{{ food.name }}</h1>
+            <div class="detail">
+              <span class="sell-count">月售 {{ food.sellCount }} 份</span>
+              <span class="rating">好评率 {{ food.rating }}%</span>
+            </div>
+            <div class="price">
+              <span class="now">￥{{ food.price }}</span>
+              <span class="old" v-if="food.oldPrice">￥{{ food.oldPrice }}</span>
+            </div>
+            <div class="cartcontrol-wrapper">
+              <cart-control :food="food" :update-food-count="updateFoodCount"></cart-control>
+            </div>
+            <div class="buy" v-show="!food.count" @click="updateFoodCount(food, true)">加入购物车</div>
           </div>
-          <div class="price">
-            <span class="now">￥{{ food.price }}</span>
-            <span class="old" v-if="food.oldPrice">￥{{ food.oldPrice }}</span>
+
+          <split></split>
+
+          <div class="info">
+            <h1 class="title">商品信息</h1>
+            <p class="text">{{ food.description }}</p>
           </div>
-          <div class="cartcontrol-wrapper">
-            <cart-control :food="food" :update-food-count="updateFoodCount"></cart-control>
+
+          <split></split>
+
+          <div class="rating">
+            <h1 class="title">商品评价</h1>
+            <rating-select :desc="{ all: '全部', positive: '满意', negative: '吐槽' }" :ratings="food.ratings" :only-content="onlyContent" :select-type="selectType" @setSelectType="setSelectType" @toggleOnlyContent="toggleOnlyContent"></rating-select>
+            <div class="rating-wrapper">
+              <ul>
+                <li class="rating-item border-1px" v-for="r in filterRatings">
+                  <div class="user">
+                    <span class="name">{{ r.username }}</span>
+                    <img class="avatar" :src="r.avatar" alt="avatar" width="12" height="12">
+                  </div>
+                  <div class="time">
+                    {{ r.rateTime | date-string }}
+                  </div>
+                  <p class="text">
+                    <span :class="r.rateType ? 'icon-thumb_down' : 'icon-thumb_up'"></span>
+                    {{ r.text }}
+                  </p>
+                </li>
+              </ul>
+              <div class="no-rating" v-show="!food.ratings.length">暂无评价</div>
+            </div>
           </div>
-          <div class="buy" v-show="!food.count" @click="updateFoodCount(food, true)">加入购物车</div>
-        </div>
-
-        <split></split>
-
-        <div class="info">
-          <h1 class="title">商品信息</h1>
-          <p class="text">{{ food.description }}</p>
-        </div>
-
-        <split></split>
-
-        <div class="rating">
-          <h1 class="title">商品评价</h1>
-          <rating-select :desc="{ all: '全部', positive: '满意', negative: '吐槽' }" :ratings="food.ratings" :only-content="onlyContent" :select-type="selectType" @setSelectType="setSelectType" @toggleOnlyContent="toggleOnlyContent"></rating-select>
-          <div class="rating-wrapper">
-            <ul>
-              <li class="rating-item border-1px" v-for="r in filterRatings">
-                <div class="user">
-                  <span class="name">{{ r.username }}</span>
-                  <img class="avatar" :src="r.avatar" alt="avatar" width="12" height="12">
-                </div>
-                <div class="time">
-                  {{ r.rateTime | date-string }}
-                </div>
-                <p class="text">
-                  <span :class="r.rateType ? 'icon-thumb_down' : 'icon-thumb_up'"></span>
-                  {{ r.text }}
-                </p>
-              </li>
-            </ul>
-            <div class="no-rating" v-show="!food.ratings.length">暂无评价</div>
-          </div>
-        </div>
+        </template>
       </div>
     </div>
   </transition>
@@ -65,8 +68,6 @@
 import CartControl from '../CartControl/CartControl'
 import Split from '../Split/Split'
 import RatingSelect from '../RatingSelect/RatingSelect'
-
-import BScroll from 'better-scroll'
 
 export default {
   props: {
@@ -89,7 +90,7 @@ export default {
       if (this.isShow) { // 要显示
         this.$nextTick(() => {
           if (!this.scroll) { // 如果不存在才创建, 并保存
-            this.scroll = new BScroll(this.$refs.food, {
+            this.scroll = new this.$scroll(this.$refs.food, {
               click: true
             })
           } else {
@@ -103,10 +104,9 @@ export default {
     setSelectType (selectType) {
       this.selectType = selectType
       // 在 selectType 值更改后，导致页面重新渲染后，异步刷新 scroll
-      // 这里为什么不能直接写 this.scroll.refresh，而是要用函数包起来？
-      this.$nextTick(() => {
-        this.scroll.refresh()
-      })
+      // 这里直接写 this.scroll.refresh 是不行的，要用 bind 绑定 this
+      // 否则 refresh 执行时会报错
+      this.$nextTick(this.scroll.refresh.bind(this.scroll))
     },
 
     toggleOnlyContent () {

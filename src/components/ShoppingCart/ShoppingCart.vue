@@ -60,8 +60,6 @@
 <script>
 import CartControl from '../CartControl/CartControl'
 
-import BScroll from 'better-scroll'
-
 export default {
   props: {
     minPrice: Number,
@@ -113,7 +111,7 @@ export default {
       if (this.isShow) { // 要显示
         this.$nextTick(() => {
           if (!this.scroll) { // 如果不存在才创建, 并保存
-            this.scroll = new BScroll(this.$refs.listContent, {
+            this.scroll = new this.$scroll(this.$refs.listContent, {
               click: true
             })
           } else {
