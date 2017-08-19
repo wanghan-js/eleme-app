@@ -25,8 +25,8 @@ Vue.filter('date-string', value => moment(value).format('YYYY-MM-DD HH:mm:ss'))
 // 将 axios 添加到 Vue 的显式原型上，这样每个组件的 Vue 实例中才能访问到 axios 对象
 // 否则就要在每个需要发送 ajax 请求的组件中单独引入 axios 模块
 // 其他组件公用的库，都可以这样操作
-Vue.prototype.$ajax = axios
-Vue.prototype.$scroll = BScroll
+Object.defineProperty(Vue.prototype, '$ajax', { value: axios })
+Object.defineProperty(Vue.prototype, '$scroll', { value: BScroll })
 
 new Vue({
   el: '#app',
